@@ -72,10 +72,24 @@ rm(bc)
 write.table(s.bc, file = paste0(opt$out_path, opt$sample_name, '.all.barcodes.txt'),
             quote = F, sep='\t', row.names = F, col.names = T)
 
-s.mat = sparseMatrix(as.integer(s.bc$barcode), as.integer(s.bc$taxid), x=s.bc$umi)
-colnames(s.mat) = levels(s.bc$taxid)
-rownames(s.mat) = levels(s.bc$barcode)
-s.mat = t(s.mat)
+# s.mat = sparseMatrix(as.integer(s.bc$barcode), as.integer(s.bc$taxid), x=s.bc$umi)
+# colnames(s.mat) = levels(s.bc$taxid)
+# rownames(s.mat) = levels(s.bc$barcode)
+# s.mat = t(s.mat)
+
+# convert barcode and taxid to factors
+s.bc$barcode <- as.factor(s.bc$factor)
+s.bc$taxid <- as.factor(s.bc$taxid)
+
+# create the sparse matrix using the integer representation of the factors
+s.mat <- Matrix::sparseMatrix(i = s.bc$barcode, j = s.bc$taxid, x = s.bc$umi)
+
+# assign row and column names to the sparse matrix
+rownames(s.mat) <- levels(s.bc$barcode)
+colnames(s.mat) <- levels(s.bc$taxid)
+
+# transpose the matrix
+s.mat <- Matrix::t(s.mat)
 
 print(paste('Started classifying reads for', opt$sample_name))
 
